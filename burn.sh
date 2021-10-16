@@ -1,1 +1,1 @@
-dd if=target/x86_64-rusty-kern/debug/bootimage-rusty-kern.bin of= && sync
+cargo build --release && sudo dd if=target/x86_64-rusty-kern/release/rusty-kern of=$1 && sync
