@@ -3,17 +3,22 @@
 
 use bootloader::{entry_point, BootInfo};
 use core::panic::PanicInfo;
+use print::Color;
+use print::ColorCode;
+use print::Writer;
+
+mod print;
 
 entry_point!(kernel_main);
 
 fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
-    // turn the screen gray
-    if let Some(framebuffer) = boot_info.framebuffer.as_mut() {
-        for byte in framebuffer.buffer_mut() {
-            *byte = 0x90;
-        }
-    }
-
+    let mut writer = Writer {
+        column_position: 0,
+        color_code: ColorCode::new(Color::Yellow, Color::Black),
+        buffer: boot_info.framebuffer.as_mut().unwrap(),
+    };
+    writer.write_byte(b'H');
+    writer.write_string("Hellooo worlldd");
     loop {}
 }
 

@@ -12,26 +12,39 @@ fn main() {
         let path = PathBuf::from(args.next().unwrap());
         path.canonicalize().unwrap()
     };
-    let no_boot = if let Some(arg) = args.next() {
+    let mut no_boot = false;
+    let mut bios_boot = false;
+    for arg in args {
         match arg.as_str() {
-            "--no-run" => true,
+            "--no-run" => no_boot = true,
+            "--bios-boot" => bios_boot = true,
             other => panic!("unexpected argument `{}`", other),
         }
-    } else {
-        false
-    };
+    }
 
-    let bios = create_disk_images(&kernel_binary_path);
+    let (bios, uefi) = create_disk_images(&kernel_binary_path);
 
     if no_boot {
-        println!("Created disk image at `{}`", bios.display());
+        println!(
+            "Created disk images at `{}` and `{}`",
+            bios.display(),
+            uefi.display()
+        );
         return;
     }
 
     let mut run_cmd = Command::new("qemu-system-x86_64");
-    run_cmd
-        .arg("-drive")
-        .arg(format!("format=raw,file={}", bios.display()));
+    if bios_boot {
+        run_cmd
+            .arg("-drive")
+            .arg(format!("format=raw,file={}", bios.display()));
+    } else {
+        run_cmd
+            .arg("-bios")
+            .arg("/usr/share/ovmf/x64/OVMF.fd")
+            .arg("-drive")
+            .arg(format!("format=raw,file={}", uefi.display()));
+    }
     run_cmd.args(RUN_ARGS);
 
     let exit_status = run_cmd.status().unwrap();
@@ -40,7 +53,7 @@ fn main() {
     }
 }
 
-pub fn create_disk_images(kernel_binary_path: &Path) -> PathBuf {
+pub fn create_disk_images(kernel_binary_path: &Path) -> (PathBuf, PathBuf) {
     let bootloader_manifest_path = bootloader_locator::locate_bootloader("bootloader").unwrap();
     let kernel_manifest_path = locate_cargo_manifest::locate_manifest().unwrap();
 
@@ -73,7 +86,7 @@ pub fn create_disk_images(kernel_binary_path: &Path) -> PathBuf {
         .unwrap()
         .join(format!("boot-uefi-{}.img", kernel_binary_name));
     if !bios_image.exists() || !uefi_image.exists() {
-        panic!("Failed to build disk images",);
+        panic!("Failed to build disk images");
     }
-    bios_image
+    (bios_image, uefi_image)
 }
