@@ -18,12 +18,19 @@ rustup override set nightly
 after installing all dependencies you should be able to build a bootable image as follows:
 
 ```
-cargo build
+cargo image
 ```
 
 ## running
-to run the image `qemu-system-x86_64` must be installed and on the PATH. then run using:
+to run the image `qemu-system-x86_64` must be installed and on the PATH.
+by default, the runner will start with UEFI boot:
 
 ```
 cargo run
+```
+
+this requires QEMU's OVMF firmware to be separately installed. BIOS boot does not require that dependency:
+
+```
+cargo run -- --bios-boot
 ```
