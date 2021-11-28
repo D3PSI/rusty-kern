@@ -1,7 +1,12 @@
+[unstable]
+build-std = ["core"]
+build-std-features = ["compiler-builtins-mem"]
+
+[build]
+target = "x86_64-rusty-kern.json"
+
 [target.'cfg(target_os = "none")']
-runner = "cargo run --package imager --"
+runner = "cargo run --package imager --target=x86_64-unknown-linux-gnu --"
 
 [alias]
-kbuild = "build --target x86_64-rusty-kern.json -Zbuild-std=core -Zbuild-std-features=compiler-builtins-mem"
-kimage = "run --target x86_64-rusty-kern.json -Zbuild-std=core -Zbuild-std-features=compiler-builtins-mem -- --no-run"
-krun = "run --target x86_64-rusty-kern.json -Zbuild-std=core -Zbuild-std-features=compiler-builtins-mem"
+image = "run --release -- --no-run"

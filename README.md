@@ -18,5 +18,12 @@ rustup override set nightly
 after installing all dependencies you should be able to build a bootable image as follows:
 
 ```
-cargo kimage
+cargo build
+```
+
+## running
+to run the image `qemu-system-x86_64` must be installed and on the PATH. then run using:
+
+```
+cargo run
 ```
