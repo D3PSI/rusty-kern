@@ -3,8 +3,6 @@ use std::{
     process::Command,
 };
 
-const RUN_ARGS: &[&str] = &["--no-reboot", "-s"];
-
 fn main() {
     let mut args = std::env::args().skip(1); // skip executable name
 
@@ -14,10 +12,12 @@ fn main() {
     };
     let mut no_boot = false;
     let mut bios_boot = false;
+    let mut gdb = false;
     for arg in args {
         match arg.as_str() {
             "--no-run" => no_boot = true,
             "--bios-boot" => bios_boot = true,
+            "--gdb" => gdb = true,
             other => panic!("unexpected argument `{}`", other),
         }
     }
@@ -45,7 +45,12 @@ fn main() {
             .arg("-drive")
             .arg(format!("format=raw,file={}", uefi.display()));
     }
-    run_cmd.args(RUN_ARGS);
+    if gdb {
+        run_cmd.arg("-gdb").arg("tcp:localhost:10000");
+    } else {
+        run_cmd.arg("-s");
+    }
+    run_cmd.arg("--no-reboot");
 
     let exit_status = run_cmd.status().unwrap();
     if !exit_status.success() {

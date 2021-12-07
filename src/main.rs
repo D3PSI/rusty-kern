@@ -11,6 +11,7 @@ mod print;
 
 entry_point!(kernel_main);
 
+#[no_mangle]
 fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
     let mut writer = Writer {
         column_position: 0,

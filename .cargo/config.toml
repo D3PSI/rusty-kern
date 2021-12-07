@@ -10,3 +10,4 @@ runner = "cargo run --package imager --target=x86_64-unknown-linux-gnu --"
 
 [alias]
 image = "run --release -- --no-run"
+debug = "run -- --gdb"
